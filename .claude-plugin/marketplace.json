@@ -1,0 +1,17 @@
+{
+  "name": "maxharfen",
+  "owner": {
+    "name": "MaxHarfen",
+    "url": "https://github.com/MaxHarfen"
+  },
+  "metadata": {
+    "description": "MaxHarfen's Claude Code mod: usage limits in the status line and a band of pixel crabs for the main session and its subagents."
+  },
+  "plugins": [
+    {
+      "name": "crab-band",
+      "source": "./crab-band",
+      "description": "Usage limits in the status line, and a band above the prompt: the main session's task progress and each running subagent, each led by a pixel crab dressed by model and effort."
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+.DS_Store
+*.log
+.mcpb-cache/
+.claude-plugin/types/
+*/.claude-plugin/types/
+sheet-*.png
