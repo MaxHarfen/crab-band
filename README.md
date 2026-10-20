@@ -18,7 +18,7 @@
 [crab] ● Count hooks · Haiku 5.5 · ctx 6% · 0:15
 ```
 
-- **`/agents-info`, a pane with big crabs.** The same agents on a plain background, three times the size: the main session, the subagents running now, and every subagent that finished this session (the band keeps a finished one only 30 seconds). `/agents-info` opens or closes it, `/agents-info open` only opens it. It runs at once, even typed while Claude is working, without stopping the turn.
+- **`/agents-info`, a pane with big crabs.** The same agents on a plain background, about twice the size: the main session, the subagents running now, and every subagent that finished this session (the band keeps a finished one only 30 seconds). `/agents-info` opens or closes it, `/agents-info open` only opens it. It runs at once, even typed while Claude is working, without stopping the turn.
 
 The band in the desktop app (an illustration, not a screenshot):
 

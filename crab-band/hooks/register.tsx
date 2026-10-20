@@ -16,8 +16,9 @@ const main = atom({ plugin: 'crab-band', key: 'main' } as const, IDLE)
 
 const MAX_ROWS = 5
 const MAX_KEPT = 50
-const CRAB_W = 21
-// The agents pane: the same crabs, three times the size, on a plain background.
+// One px per cell of the crab's 30-cell grid (two device pixels on a Retina screen), so its edges stay even.
+const CRAB_W = 30
+// The agents pane: the same crabs, about twice the size, on a plain background.
 const PANE = 'crab-agents'
 const PANE_TITLE = 'Agents'
 const BIG_W = 63

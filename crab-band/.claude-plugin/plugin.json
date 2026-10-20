@@ -1,6 +1,6 @@
 {
   "name": "crab-band",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Your Claude usage limits in the status line, and a band above the prompt with a row for the main session (task list, progress gauge, model, context, time) and one per running subagent, each led by a Clawd-style pixel crab in an outfit chosen by model and effort; and /agents-info, a plain pane of the same agents with big crabs.",
   "author": {
     "name": "MaxHarfen",
