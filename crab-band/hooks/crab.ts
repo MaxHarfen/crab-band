@@ -9,6 +9,8 @@
 // arms, eye the eyes, and each outfit's props (it, star, bub, pop, boom, smoke, pa, pb, pc, loop,
 // flag, can, drop, nt, nt2, needle, hair, skirt, sp, ht).
 
+import { DANCE_SECONDS, keyframes, move } from './moves'
+
 type Part = { x: number; y: number; group: string; rows: string[]; legend: Record<string, string> }
 type Art = {
   // A base legend entry is [colour, group], or [colour, group, underlay]: a body pixel in that colour
@@ -754,12 +756,7 @@ export const COSTUME_NAME: Record<string, string> = {
 // Loops longer than the once-a-second redraw (the musician's dance, the scientist's flask, the
 // painter's strokes, the explorer's glances) run from the phase the drawing passes in (`--d`, a
 // negative delay), so they carry on where they were instead of starting over.
-export const DANCE_SECONDS = 4
-
-const pct = (second: number, loop = DANCE_SECONDS): string => `${((second / loop) * 100).toFixed(3)}%`
-const keyframes = (name: string, steps: Array<[number, string]>, loop = DANCE_SECONDS): string =>
-  `@keyframes ${name}{${steps.map(([second, rule]) => `${pct(second, loop)}{${rule}}`).join('')}}`
-const move = (steps: Array<[number, string]>): Array<[number, string]> => steps.map(([s, tf]) => [s, `transform:${tf}`])
+export { DANCE_SECONDS }
 
 // The musician's b-boy routine: toprock (sway and bounce on the beat), a drop, a one-turn headspin in
 // 45 degree steps, a freeze upside down with the legs to the sky, then a pop back up and a hop.
