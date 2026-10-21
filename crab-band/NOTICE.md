@@ -2,11 +2,11 @@
 
 crab-band began as a fork of the savvy-progress mod in
 [johnnyvizz/claude-kit](https://github.com/johnnyvizz/claude-kit) (v1.2.1, commit c871c15). The crab outfits
-and their animations were redrawn for crab-band, but these parts are still adapted from savvy-progress:
+and their animations were redrawn for crab-band and the dances are its own, but these parts are still adapted
+from savvy-progress:
 
-- `hooks/crab.ts`: the base crab's geometry, the walking, bob, float and blink rules and keyframes in
-  `CRAB_CSS` with its reduced-motion rule, the grouping of parts in `crabMarkup`, and the accent colours in
-  `COSTUME_ACCENT`
+- `hooks/crab.ts`: the base crab's geometry, `crabCss`'s shared rules (the fill-box rule and the
+  reduced-motion rule), the grouping of parts in `crabMarkup`, and the accent colours in `COSTUME_ACCENT`
 - `hooks/costume.ts`: `savvyTier`
 - `hooks/format.ts`: `windowOf` and the model-name pattern in `modelName`
 - `hooks/register.tsx`: the lines that nest other mods' bands beneath the band
