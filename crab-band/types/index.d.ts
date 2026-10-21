@@ -42,6 +42,8 @@ declare module 'claude-code' {
       runs: Run[]
       now: number
       main: Main
+      /** Whether the agents pane is on screen (open, placed and the shown tab): the band steps aside. */
+      paneShown: boolean
     }
   }
 }

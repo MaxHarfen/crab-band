@@ -14,6 +14,7 @@ const IDLE: Main = { model: '', isWorking: false, turnStartedAt: 0, contextToken
 const runs = atom({ plugin: 'crab-band', key: 'runs' } as const, [])
 const now = atom({ plugin: 'crab-band', key: 'now' } as const, 0)
 const main = atom({ plugin: 'crab-band', key: 'main' } as const, IDLE)
+const paneShown = atom({ plugin: 'crab-band', key: 'paneShown' } as const, false)
 
 const MAX_ROWS = 5
 const MAX_KEPT = 50
@@ -53,9 +54,24 @@ async function drawLimits($: EngineInterface, limits: readonly SessionRateLimit[
   $.ui.status(formatLimits(limits, await $.clock.now()))
 }
 
+// Whether the agents pane is on screen: open, placed and the tab its surface shows. No event says
+// when the person switches tabs, so the tick asks again every second; open, close and a reload
+// ask at once. Written only when it changes, so the band redraws only then.
+async function syncPane($: EngineInterface) {
+  let isShown = false
+  try {
+    isShown = (await $.ui.panes()).some(pane => pane.id === PANE && pane.isPlaced && pane.isShown)
+  } catch {
+    return // the record is unreadable: leave the band as it is
+  }
+  if ((await read($, paneShown)) !== isShown) await update($, paneShown, () => isShown)
+}
+
 // Moves the band's clock once a second while something on it moves: the main session at work,
-// a running subagent, or a finished one still lingering (and once more as it leaves).
+// a running subagent, or a finished one still lingering (and once more as it leaves). Asks after
+// the pane every second regardless.
 async function tick($: EngineInterface) {
+  await syncPane($)
   const at = await $.clock.now()
   const list = await read($, runs)
   const shown = await read($, now)
@@ -104,6 +120,8 @@ export const register: Register = on => {
     } catch {
       // the pane stays unreachable; everything else works
     }
+    // A reload keeps the pane up: the band starts aside if it is on screen.
+    await syncPane($)
     return started
   })
 
@@ -230,12 +248,21 @@ export const register: Register = on => {
   on('command.run', { command: 'agents-info' }, async ($, e) => {
     const isOpen = (await $.ui.panes()).some(pane => pane.id === PANE)
     if (isOpen && e.args.trim() !== 'open') {
-      await $.ui.close({ id: PANE })
+      await $.ui.close({ id: PANE }) // the ui.close hook below brings the band back
       return { text: 'Agents pane closed.' }
     }
     await $.ui.open({ id: PANE, title: PANE_TITLE })
+    await syncPane($)
     return { text: 'Agents pane opened.' }
   })
+
+  // Every close of the pane (this command, the person's close mark, an unload) brings the band back
+  // at once, without waiting for the tick.
+  on('ui.close', async ($, e, next) => {
+    const closed = await next(e)
+    if (e.id === PANE) await update($, paneShown, () => false)
+    return closed
+  }).catch(($, e, next) => next(e))
 
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
     const ui = $.ui.resolve(e)
@@ -296,6 +323,8 @@ export const register: Register = on => {
 
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
     if (e.props.hasSurvey) return next(e)
+    // While the agents pane shows the same crabs, the band draws nothing of its own.
+    if (await read($, paneShown)) return next(e)
 
     const at = await read($, now)
     const m = await read($, main)
