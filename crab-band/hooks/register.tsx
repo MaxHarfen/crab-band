@@ -3,7 +3,7 @@ import type { EngineInterface, Register, SessionRateLimit, Timer } from 'claude-
 
 import type { Main, Run, RunStatus } from '../types'
 import { costumeFor, savvyTier } from './costume'
-import { COSTUME_ACCENT, COSTUME_NAME, CRAB_CSS, crabMarkup } from './crab'
+import { COSTUME_ACCENT, COSTUME_NAME, crabCss, crabMarkup } from './crab'
 import { isVisible, mainMeta, mainRowText, mainTitle, rowText, runMeta, runTitle } from './format'
 import { formatLimits } from './limits-format'
 import { PLAN_TOOL, TODO_TOOL, WRAP_TOOL, applyPlanCall, applyTodos, finishAll, isFinished } from './plan'
@@ -37,7 +37,7 @@ const mainCostume = (m: Main): string => costumeFor('other', 'main', m.model, m.
 const crabTall = (costume: string): number => (costume === 'sonnet' ? 37 : 32)
 const crabHeight = (costume: string, width = CRAB_W): number => Math.round((width * crabTall(costume)) / 30)
 const crabSvg = (costume: string, isWalking: boolean, phase: number, width = CRAB_W): string =>
-  `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${crabHeight(costume, width)}" viewBox="0 -4 30 ${crabTall(costume)}" shape-rendering="crispEdges">${CRAB_CSS}${crabMarkup(costume, COSTUME_ACCENT[costume] ?? '#888780', isWalking, phase)}</svg>`
+  `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${crabHeight(costume, width)}" viewBox="0 -4 30 ${crabTall(costume)}" shape-rendering="crispEdges">${crabCss(costume)}${crabMarkup(costume, COSTUME_ACCENT[costume] ?? '#888780', isWalking, phase)}</svg>`
 
 // The status line: the 5-hour and weekly limits with their reset countdowns, redrawn once a
 // minute so the countdowns keep moving while idle.

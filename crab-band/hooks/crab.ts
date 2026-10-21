@@ -9,7 +9,7 @@
 // arms, eye the eyes, and each outfit's props (it, star, bub, pop, boom, smoke, pa, pb, pc, loop,
 // flag, can, drop, nt, nt2, needle, hair, skirt, sp, ht).
 
-import { DANCE_SECONDS, keyframes, move } from './moves'
+import { DANCE_SECONDS, keyframes, move, routineCss } from './moves'
 
 type Part = { x: number; y: number; group: string; rows: string[]; legend: Record<string, string> }
 type Art = {
@@ -753,39 +753,25 @@ export const COSTUME_NAME: Record<string, string> = {
 
 // --- Motion -------------------------------------------------------------------------------------
 
-// Loops longer than the once-a-second redraw (the musician's dance, the scientist's flask, the
-// painter's strokes, the explorer's glances) run from the phase the drawing passes in (`--d`, a
-// negative delay), so they carry on where they were instead of starting over.
+// Every crab dances its outfit's routine (moves.ts) while its agent works; its props keep their own
+// motion on top. Loops longer than the once-a-second redraw (the dances, the scientist's flask, the
+// painter's strokes, the explorer's glances, the wizard's star, the doll's flip and twinkle) run from
+// the phase the drawing passes in (`--d`, a negative delay), so they carry on where they were instead
+// of starting over.
 export { DANCE_SECONDS }
 
-// The musician's b-boy routine: toprock (sway and bounce on the beat), a drop, a one-turn headspin in
-// 45 degree steps, a freeze upside down with the legs to the sky, then a pop back up and a hop.
-const DANCE: Array<[number, string]> = [
-  [0, 'translate(-1px,0)'], [0.25, 'translate(0,1px)'], [0.5, 'translate(1px,0)'], [0.75, 'translate(0,1px)'],
-  [1, 'translate(-1px,0)'], [1.25, 'translate(0,1px)'],
-  [1.5, 'translate(0,1px) rotate(45deg)'], [1.55, 'translate(0,1px) rotate(90deg)'], [1.6, 'translate(0,1px) rotate(135deg)'],
-  ...Array.from({ length: 8 }, (_, k): [number, string] => [1.65 + k * 0.10625, `translate(0,1px) rotate(${180 + 45 * k}deg)`]),
-  [2.5, 'translate(0,2px) rotate(180deg)'], [2.56, 'translate(0,2px) rotate(135deg)'],
-  [3.5, 'translate(0,1px) rotate(90deg)'], [3.55, 'translate(0,1px) rotate(45deg)'], [3.6, 'translate(0,1px) rotate(0deg)'],
-  [3.65, 'translate(0,-2px)'], [3.7, 'translate(0,-3px)'], [3.8, 'translate(0,-2px)'], [3.85, 'translate(0,-1px)'],
-  [3.9, 'translate(0,0)'],
-]
-// Legs and arms through the same loop, as [second, lift]: on the beat in the toprock, legs tucked in
-// the spin, one arm up in the freeze.
-const DANCE_LIMBS: Record<string, Array<[number, number]>> = {
-  la: [[0, -1], [0.25, 0], [0.5, -1], [0.75, 0], [1, -1], [1.25, 0], [1.5, 0], [1.65, -1], [2.5, 0]],
-  lb: [[0, 0], [0.25, -1], [0.5, 0], [0.75, -1], [1, 0], [1.25, -1], [1.5, 0], [1.65, -1], [2.5, 0]],
-  cl: [[0, -3], [0.25, 0], [0.5, -3], [0.75, 0], [1, -3], [1.25, 0], [1.5, 0]],
-  cr: [[0, 0], [0.25, -3], [0.5, 0], [0.75, -3], [1, 0], [1.25, -3], [1.5, 0], [2.5, -4], [3.5, 0]],
-}
+// Whether `ms` into the loop falls in the second half of a `period` that starts `delay` in.
+const late = (ms: number, period: number, delay: number): boolean => (((ms - delay) % period) + period) % period >= period / 2
 
-// The scientist's body: the walking bounce, and a shake while the flask blows (2.15 s to 2.45 s).
-const SHAKE: Array<[number, string]> = Array.from({ length: 80 }, (_, k): [number, string] => {
-  const t = k * 0.05
-  const bob = ((t + 0.125) % 0.5) / 0.5 >= 0.5 ? 1 : 0
-  const shake = t >= 2.15 && t < 2.45 ? (k % 2 ? 1 : -1) : 0
-  return [t, `translate(${shake}px,${bob}px)`]
-})
+// A prop that dims and brightens over the 4 s loop, read every `stepMs`, held between changes.
+const blinks = (name: string, stepMs: number, dimmed: string, isDim: (ms: number) => boolean): string => {
+  const steps: Array<[number, string]> = []
+  for (let ms = 0; ms < DANCE_SECONDS * 1000; ms += stepMs) {
+    const rule = isDim(ms) ? `opacity:${dimmed}` : 'opacity:1'
+    if (steps[steps.length - 1]?.[1] !== rule) steps.push([ms / 1000, rule])
+  }
+  return keyframes(name, steps)
+}
 
 // The scientist's bubbles: three rise from the flask, then the fourth second is the blast.
 const BUBBLES: Array<[number, string]> = [0, 1, 3].flatMap((k): Array<[number, string]> => [
@@ -798,70 +784,95 @@ const flashes = (on: number, off: number): Array<[number, string]> => [[0, 'opac
 const stroke = (start: number): Array<[number, string]> => [
   [0, 'opacity:0'], [start - 0.01, 'opacity:0'], [start, 'opacity:1'], [1.6, 'opacity:1'], [2, 'opacity:0'],
 ]
+const loop = (cls: string, name: string, timing: string, outfit: string, extra = ''): string =>
+  `.c-${outfit}.run .${cls}{${extra}animation:${name} ${DANCE_SECONDS}s ${timing} infinite var(--d,0s)}`
 
-const LONG_LOOPS = [
-  keyframes('bb', move(DANCE)),
-  ...Object.entries(DANCE_LIMBS).map(([cls, steps]) =>
-    keyframes(`bb-${cls}`, steps.map(([second, lift]): [number, string] => [second, `transform:translateY(${lift}px)`])),
-  ),
-  '.c-sonnet.run .bd{animation:none}',
-  `.c-sonnet.run .dn{transform-origin:50% 57.143%;animation:bb ${DANCE_SECONDS}s steps(1,end) infinite var(--d,0s)}`,
-  ...Object.keys(DANCE_LIMBS).map(
-    cls => `.c-sonnet.run .${cls}{animation:bb-${cls} ${DANCE_SECONDS}s steps(1,end) infinite var(--d,0s)}`,
-  ),
-  keyframes('shake', move(SHAKE)),
-  keyframes('bub', BUBBLES),
-  keyframes('pop', flashes(2, 2.15)),
-  keyframes('boom', flashes(2.15, 2.45)),
-  keyframes('smoke', [[0, 'transform:translateY(0);opacity:0'], [2.4, 'transform:translateY(0);opacity:0'],
-    [2.401, 'transform:translateY(0);opacity:1'], [3.2, 'transform:translateY(-3px);opacity:0']]),
-  '.c-heavy .pop,.c-heavy .boom,.c-heavy .smoke{opacity:0}',
-  `.c-heavy.run .bd{animation:shake 4s steps(1,end) infinite var(--d,0s)}`,
-  `.c-heavy.run .bub{animation:bub 4s ease-out infinite var(--d,0s)}`,
-  `.c-heavy.run .pop{animation:pop 4s steps(1,end) infinite var(--d,0s)}`,
-  `.c-heavy.run .boom{animation:boom 4s steps(1,end) infinite var(--d,0s)}`,
-  `.c-heavy.run .smoke{animation:smoke 4s linear infinite var(--d,0s)}`,
-  keyframes('pa', stroke(0.2), 2),
-  keyframes('pb', stroke(0.5), 2),
-  keyframes('pc', stroke(0.8), 2),
-  ...['pa', 'pb', 'pc'].map(cls => `.c-careful.run .${cls}{animation:${cls} 2s linear infinite var(--d,0s)}`),
-  keyframes('look', [[0, 'transform:translateX(-1px)'], [0.8, 'transform:translateX(0)'], [1, 'transform:translateX(1px)'],
-    [1.8, 'transform:translateX(0)']], 2),
-  `.c-explore.run .eye{animation:look 2s steps(1,end) infinite var(--d,0s)}`,
-].join('\n')
+// Each outfit's props and how they move, with the routine's timing where they follow the dance.
+const PROP_CSS: Record<string, string[]> = {
+  fable: [
+    '.c-fable.run .it{transform-origin:0 100%;animation:wand 1s ease-in-out infinite}',
+    '@keyframes wand{25%{transform:rotate(15deg)}75%{transform:rotate(-15deg)}}',
+    // The star blinks every half second, and twice as fast while he rises (1 s to 2.5 s).
+    blinks('star', 125, '.2', ms => late(ms, ms >= 1000 && ms < 2500 ? 250 : 500, 125)),
+    loop('star', 'star', 'steps(1,end)', 'fable'),
+  ],
+  heavy: [
+    keyframes('bub', BUBBLES),
+    keyframes('pop', flashes(2, 2.15)),
+    keyframes('boom', flashes(2.15, 2.45)),
+    keyframes('smoke', [[0, 'transform:translateY(0);opacity:0'], [2.4, 'transform:translateY(0);opacity:0'],
+      [2.401, 'transform:translateY(0);opacity:1'], [3.2, 'transform:translateY(-3px);opacity:0']]),
+    '.c-heavy .pop,.c-heavy .boom,.c-heavy .smoke{opacity:0}',
+    loop('bub', 'bub', 'ease-out', 'heavy'),
+    loop('pop', 'pop', 'steps(1,end)', 'heavy'),
+    loop('boom', 'boom', 'steps(1,end)', 'heavy'),
+    loop('smoke', 'smoke', 'linear', 'heavy'),
+  ],
+  careful: [
+    '.c-careful.run .it{transform-origin:50% 100%;animation:brush .5s ease-in-out infinite}',
+    '@keyframes brush{50%{transform:rotate(-25deg)}}',
+    keyframes('pa', stroke(0.2), 2),
+    keyframes('pb', stroke(0.5), 2),
+    keyframes('pc', stroke(0.8), 2),
+    ...['pa', 'pb', 'pc'].map(cls => `.c-careful.run .${cls}{animation:${cls} 2s linear infinite var(--d,0s)}`),
+  ],
+  doll: [
+    // The hair swings out on the flip, the skirt flares on the turn, the sparkle twinkles (faster in
+    // the closing pose) and a heart floats up every second.
+    keyframes('hair', move([[0, 'rotate(0deg)'], [2, 'rotate(10deg)'], [2.15, 'rotate(-12deg)'], [2.3, 'rotate(0deg)']])),
+    loop('hair', 'hair', 'steps(1,end)', 'doll', 'transform-origin:50% 18.75%;'),
+    keyframes('flare', move([[0, 'scaleX(1)'], [2.5, 'scaleX(1.2)'], [2.875, 'scaleX(1)']])),
+    loop('skirt', 'flare', 'steps(1,end)', 'doll', 'transform-origin:50% 0;'),
+    blinks('twinkle', 25, '.15', ms => late(ms, ms >= 3000 ? 250 : 500, 100)),
+    loop('sp', 'twinkle', 'steps(1,end)', 'doll'),
+    '@keyframes heart{0%{transform:translateY(2px);opacity:0}25%{opacity:1}100%{transform:translateY(-5px);opacity:0}}',
+    '.c-doll.run .ht{animation:heart 1s ease-out infinite var(--d,0s)}',
+  ],
+  medium: [
+    '.c-medium.run .loop{transform-origin:50% 50%;animation:lasso 1s ease-in-out infinite}',
+    '@keyframes lasso{50%{transform:scaleX(.2)}}',
+  ],
+  light: [
+    '.c-light.run .flag{transform-origin:0 50%;animation:flutter .25s steps(1) infinite}',
+    '.c-light.run .it{transform-origin:50% 50%;animation:spin .25s steps(1) infinite}',
+    '@keyframes flutter{50%{transform:skewY(-14deg) scaleX(.85)}}@keyframes spin{50%{transform:rotate(45deg)}}',
+  ],
+  haiku: [
+    '.c-haiku.run .can{transform-origin:100% 50%;animation:pour 1s ease-in-out infinite}',
+    '.c-haiku.run .drop{animation:drip 1s linear infinite}',
+    '@keyframes pour{20%,40%{transform:rotate(-15deg)}60%{transform:rotate(0)}}',
+    '@keyframes drip{0%{transform:translateY(0);opacity:1}100%{transform:translateY(4px);opacity:0}}',
+  ],
+  sonnet: [
+    '.c-sonnet.run .nt{animation:rise 1s ease-out infinite var(--d,0s)}.c-sonnet.run .nt2{animation:rise 1s ease-out infinite calc(var(--d,0s) - .5s)}',
+    '@keyframes rise{0%{transform:translateY(3px);opacity:0}25%{opacity:1}100%{transform:translateY(-4px);opacity:0}}',
+  ],
+  explore: [
+    '.c-explore.run .needle{transform-origin:50% 50%;animation:swing 1s ease-in-out infinite}',
+    '@keyframes swing{25%{transform:rotate(30deg)}75%{transform:rotate(-30deg)}}',
+    keyframes('look', [[0, 'transform:translateX(-1px)'], [0.8, 'transform:translateX(0)'], [1, 'transform:translateX(1px)'],
+      [1.8, 'transform:translateX(0)']], 2),
+    '.c-explore.run .eye{animation:look 2s steps(1,end) infinite var(--d,0s)}',
+  ],
+  other: [],
+}
 
-// Pure CSS, run by the compositor. Every crab walks: legs step in turn, the body bobs, the arms wave
-// by turns; each outfit adds its props' motion on top.
-export const CRAB_CSS = `<style>
-.run .la{animation:st .5s steps(1) infinite}.run .lb{animation:st .5s steps(1) infinite -.25s}
-.run .bd{animation:bob .5s steps(1) infinite -.125s}
-.run .cl{animation:st 1s steps(1) infinite}.run .cr{animation:st 1s steps(1) infinite -.5s}
-.run g{transform-box:fill-box}
-@keyframes st{50%{transform:translateY(-1px)}}@keyframes bob{50%{transform:translateY(1px)}}@keyframes blink{50%{opacity:.2}}
-.c-fable.run{animation:float 1s ease-in-out infinite}
-.c-fable.run .la,.c-fable.run .lb,.c-fable.run .bd,.c-fable.run .cl,.c-fable.run .cr{animation:none}
-.c-fable.run .it{transform-origin:0 100%;animation:wand 1s ease-in-out infinite}
-.c-fable.run .star{animation:blink .5s steps(1) infinite -.25s}
-@keyframes float{50%{transform:translateY(-2px)}}@keyframes wand{25%{transform:rotate(15deg)}75%{transform:rotate(-15deg)}}
-.c-careful.run .it{transform-origin:50% 100%;animation:brush .5s ease-in-out infinite}
-@keyframes brush{50%{transform:rotate(-25deg)}}
-.c-medium.run .loop{transform-origin:50% 50%;animation:lasso 1s ease-in-out infinite}
-@keyframes lasso{50%{transform:scaleX(.2)}}
-.c-light.run .la{animation-duration:.25s}.c-light.run .lb{animation-duration:.25s;animation-delay:-.125s}
-.c-light.run .flag{transform-origin:0 50%;animation:flutter .25s steps(1) infinite}
-.c-light.run .it{transform-origin:50% 50%;animation:spin .25s steps(1) infinite}
-@keyframes flutter{50%{transform:skewY(-14deg) scaleX(.85)}}@keyframes spin{50%{transform:rotate(45deg)}}
-.c-haiku.run .can{transform-origin:100% 50%;animation:pour 1s ease-in-out infinite}
-.c-haiku.run .drop{animation:drip 1s linear infinite}
-@keyframes pour{20%,40%{transform:rotate(-15deg)}60%{transform:rotate(0)}}
-@keyframes drip{0%{transform:translateY(0);opacity:1}100%{transform:translateY(4px);opacity:0}}
-.c-sonnet.run .nt{animation:rise 1s ease-out infinite var(--d,0s)}.c-sonnet.run .nt2{animation:rise 1s ease-out infinite calc(var(--d,0s) - .5s)}
-@keyframes rise{0%{transform:translateY(3px);opacity:0}25%{opacity:1}100%{transform:translateY(-4px);opacity:0}}
-.c-explore.run .needle{transform-origin:50% 50%;animation:swing 1s ease-in-out infinite}
-@keyframes swing{25%{transform:rotate(30deg)}75%{transform:rotate(-30deg)}}
-${LONG_LOOPS}
-@media (prefers-reduced-motion: reduce){.run,.run g{animation:none!important}}
-</style>`
+// An outfit nobody drew (a new savvy tier, a typo) is the plain crab, its dance and all.
+const outfitOf = (costume: string): string => (ART.outfits[costume] ? costume : 'other')
+
+// One crab's stylesheet: pure CSS, run by the compositor. It holds only that crab's outfit: the
+// shared rules, its props' motion and its dance. Reduced motion freezes all of it.
+export const crabCss = (costume: string): string => {
+  const outfit = outfitOf(costume)
+  return [
+    '<style>',
+    '.run g{transform-box:fill-box}',
+    ...(PROP_CSS[outfit] ?? []),
+    routineCss(outfit),
+    '@media (prefers-reduced-motion: reduce){.run,.run g{animation:none!important}}',
+    '</style>',
+  ].join('\n')
+}
 
 // --- Drawing ------------------------------------------------------------------------------------
 
@@ -897,27 +908,31 @@ const runsOf = (outfit: string, accent: string): Run[] => {
 
 // Props that stay put while the crab dances: drawn outside the dancing group.
 const STILL_PROPS = new Set(['nt', 'nt2'])
+// The claws, drawn after every other prop so they sit in front of the outfit (the doll's hair).
+const CLAWS = ['cl', 'cr']
 
 // One crab's markup in its own 30 x 28 grid, for a caller to place and scale. Body and props nest
-// inside `bd` so a prop rides the bob and adds its own motion; legs stay outside it and step on
-// their own; `dn` holds all of them (and a frame that fixes its box, the dance's pivot), and the
-// still props sit outside it. `phase` is how long the agent has run, in seconds: where the long
-// loops pick up after a redraw.
+// inside `bd` so a prop rides the squat and adds its own motion, the claws last; legs stay outside it
+// and lift on their own; `dn` holds all of them (and a frame that fixes its box, the dance's pivot),
+// and the still props sit outside it. `phase` is how long the agent has run, in seconds: where the
+// dance and the long loops pick up after a redraw.
 export const crabMarkup = (costume: string, accent: string, isWalking: boolean, phase = 0): string => {
+  const outfit = outfitOf(costume)
   const groups = new Map<string, string[]>([['bd', []]])
-  for (const r of runsOf(ART.outfits[costume] ? costume : 'other', accent)) {
+  for (const r of runsOf(outfit, accent)) {
     if (!groups.has(r.group)) groups.set(r.group, [])
     groups.get(r.group)?.push(`<rect x="${r.x}" y="${r.y}" width="${r.w}" height="1" fill="${r.colour}"/>`)
   }
   const group = (cls: string) => `<g class="${cls}">${(groups.get(cls) ?? []).join('')}</g>`
   const props = [...groups.keys()].filter(k => k !== 'bd' && k !== 'la' && k !== 'lb')
-  const moving = props.filter(k => !STILL_PROPS.has(k))
+  const moving = [...props.filter(k => !STILL_PROPS.has(k) && !CLAWS.includes(k)), ...CLAWS.filter(k => groups.has(k))]
   const still = props.filter(k => STILL_PROPS.has(k))
   const body = `<g class="bd">${(groups.get('bd') ?? []).join('')}${moving.map(group).join('')}</g>`
   const delay = isWalking && phase > 0 ? ` style="--d:-${(phase % DANCE_SECONDS).toFixed(2)}s"` : ''
   return (
-    `<g class="c-${costume}${isWalking ? ' run' : ''}"${delay}>` +
+    `<g class="c-${outfit}${isWalking ? ' run' : ''}"${delay}>` +
     `<g class="dn"><rect x="0" y="0" width="30" height="28" fill="none"/>${body}${group('la')}${group('lb')}</g>` +
     `${still.map(group).join('')}</g>`
   )
 }
+
