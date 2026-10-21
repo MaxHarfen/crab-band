@@ -2,8 +2,9 @@
 // costs. A savvy-flow worker (savvy-careful, ...) wears its tier's outfit; Explore is the explorer.
 //
 //   Fable                      fable (wizard)
-//   Opus, effort xhigh / max   heavy (scientist)
-//   Opus, effort high          careful (painter)
+//   Opus, effort max           heavy (scientist)
+//   Opus, effort xhigh         careful (painter)
+//   Opus, effort high          doll (doll)
 //   Opus, effort medium        medium (cowboy)
 //   Opus, effort low           light (ninja)
 //   Haiku                      haiku (gardener)
@@ -18,8 +19,9 @@ export const costumeFor = (tier: string, type: string, model: string, effort?: s
   const m = model.toLowerCase()
   if (/fable|mythos/.test(m)) return 'fable'
   if (/opus/.test(m)) {
-    if (effort === 'xhigh' || effort === 'max') return 'heavy'
-    if (effort === 'high') return 'careful'
+    if (effort === 'max') return 'heavy'
+    if (effort === 'xhigh') return 'careful'
+    if (effort === 'high') return 'doll'
     if (effort === 'medium') return 'medium'
     if (effort === 'low') return 'light'
     return 'other'

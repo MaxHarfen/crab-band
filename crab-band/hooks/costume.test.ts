@@ -11,8 +11,10 @@ describe('costumeFor', () => {
   test('other agents dress by model and effort', () => {
     expect(costumeFor('other', 'general-purpose', 'claude-fable-5-1', 'high')).toBe('fable')
     expect(costumeFor('other', 'general-purpose', 'claude-opus-5-5', 'max')).toBe('heavy')
-    expect(costumeFor('other', 'general-purpose', 'claude-opus-5-5[1m]', 'xhigh')).toBe('heavy')
-    expect(costumeFor('other', 'Plan', 'claude-opus-5-5', 'high')).toBe('careful')
+    expect(costumeFor('other', 'general-purpose', 'claude-opus-5-5', 'xhigh')).toBe('careful')
+    expect(costumeFor('other', 'general-purpose', 'claude-opus-5-5[1m]', 'xhigh')).toBe('careful')
+    expect(costumeFor('other', 'general-purpose', 'claude-opus-5-5', 'high')).toBe('doll')
+    expect(costumeFor('other', 'Plan', 'claude-opus-5-5', 'high')).toBe('doll')
     expect(costumeFor('other', 'general-purpose', 'claude-opus-5-5', 'medium')).toBe('medium')
     expect(costumeFor('other', 'general-purpose', 'claude-opus-5-5', 'low')).toBe('light')
     expect(costumeFor('other', 'general-purpose', 'claude-sonnet-5-5', undefined)).toBe('sonnet')

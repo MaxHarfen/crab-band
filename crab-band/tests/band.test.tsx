@@ -141,7 +141,7 @@ for (const surface of ['desktop'] as const) {
     } else {
       await step
     }
-    expect(during).toEqual(['scientist crab'])
+    expect(during).toEqual(['painter crab'])
   })
 }
 
