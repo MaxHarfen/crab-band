@@ -3,7 +3,11 @@ import type { Engine } from 'claude-code/testing'
 import type { On } from 'claude-code'
 
 import { elapsed, modelName } from '../hooks/format'
-import { routineOf } from '../hooks/moves'
+import { MOVES, routineOf } from '../hooks/moves'
+
+// Every crab is drawn as wide as the union of the dances' boxes, so the rows line up.
+const VIEW_X = Math.min(...Object.values(MOVES).map(r => r.box[0]))
+const VIEW_W = Math.max(...Object.values(MOVES).map(r => r.box[0] + r.box[2])) - VIEW_X
 
 const PLUGIN = 'crab-band'
 type Surface = 'terminal' | 'desktop' | 'vscode'
@@ -146,7 +150,7 @@ for (const surface of ['desktop'] as const) {
   })
 }
 
-test("desktop: each band crab's view is its dance's box, one pixel per grid unit", async ($, on) => {
+test("desktop: every band crab is as wide as the widest dance, so the rows line up, and as tall as its own", async ($, on) => {
   await start($, on, 'desktop')
   await $.agent.spawn({
     tool_use_id: 't1',
@@ -158,10 +162,11 @@ test("desktop: each band crab's view is its dance's box, one pixel per grid unit
   const ui = await $.ui.mount({ plugin: PLUGIN, surface: 'desktop', ...BAND })
   const crabs = (await ui.findAll({ type: 'Svg' })).map(el => el.props as { alt?: string; width?: number; height?: number; source?: string })
   await ui.unmount()
-  const [x, y, w, h] = routineOf('haiku').box
+  const [, y, , h] = routineOf('haiku').box
   const gardener = crabs.find(c => c.alt === 'gardener crab')
-  expect([gardener?.width, gardener?.height]).toEqual([w, h])
-  expect(gardener?.source).toContain(`width="${w}" height="${h}" viewBox="${x} ${y} ${w} ${h}"`)
+  expect([gardener?.width, gardener?.height]).toEqual([VIEW_W, h])
+  expect(gardener?.source).toContain(`width="${VIEW_W}" height="${h}" viewBox="${VIEW_X} ${y} ${VIEW_W} ${h}"`)
+  expect(crabs.map(c => c.width)).toEqual([VIEW_W, VIEW_W])
 })
 
 // VS Code pins a "From the <plugin> plugin" mark on a mod's band and paints it over the slash-command

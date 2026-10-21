@@ -6,7 +6,7 @@ import { costumeFor, savvyTier } from './costume'
 import { COSTUME_ACCENT, COSTUME_NAME, crabCss, crabMarkup } from './crab'
 import { isVisible, mainMeta, mainRowText, mainTitle, rowText, runMeta, runTitle } from './format'
 import { formatLimits } from './limits-format'
-import { routineOf } from './moves'
+import { MOVES, routineOf } from './moves'
 import { PLAN_TOOL, TODO_TOOL, WRAP_TOOL, applyPlanCall, applyTodos, finishAll, isFinished } from './plan'
 
 const IDLE: Main = { model: '', isWorking: false, turnStartedAt: 0, contextTokens: 0, plan: [] }
@@ -33,17 +33,22 @@ const COLOR: Record<RunStatus, string> = { running: '#8f8cf4', done: '#5fbf8f', 
 const costumeOf = (run: Run): string => costumeFor(savvyTier(run.type ?? ''), run.type ?? '', run.model, run.effort)
 const mainCostume = (m: Main): string => costumeFor('other', 'main', m.model, m.effort)
 
-// One crab as its own SVG, `unit` px per grid unit, dancing while the agent runs. The view is its
-// dance's box, which holds every frame of the routine, props and all; `phase` (seconds the agent
-// has run) keeps the dance going across the once-a-second redraw.
+// Every crab is as wide as the union of the dances' boxes, so the marks and text after the crabs line
+// up row after row and the crabs stand on one grid; its height is its own dance's box.
+const VIEW_X = Math.min(...Object.values(MOVES).map(r => r.box[0]))
+const VIEW_W = Math.max(...Object.values(MOVES).map(r => r.box[0] + r.box[2])) - VIEW_X
+
+// One crab as its own SVG, `unit` px per grid unit, dancing while the agent runs. The view holds
+// every frame of the routine, props and all; `phase` (seconds the agent has run) keeps the dance
+// going across the once-a-second redraw.
 const crabSize = (costume: string, unit = 1): [number, number] => {
-  const [, , w, h] = routineOf(costume).box
-  return [Math.round(w * unit), Math.round(h * unit)]
+  const [, , , h] = routineOf(costume).box
+  return [Math.round(VIEW_W * unit), Math.round(h * unit)]
 }
 const crabSvg = (costume: string, isWalking: boolean, phase: number, unit = 1): string => {
-  const [x, y, w, h] = routineOf(costume).box
+  const [, y, , h] = routineOf(costume).box
   const [width, height] = crabSize(costume, unit)
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="${x} ${y} ${w} ${h}" shape-rendering="crispEdges">${crabCss(costume)}${crabMarkup(costume, COSTUME_ACCENT[costume] ?? '#888780', isWalking, phase)}</svg>`
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="${VIEW_X} ${y} ${VIEW_W} ${h}" shape-rendering="crispEdges">${crabCss(costume)}${crabMarkup(costume, COSTUME_ACCENT[costume] ?? '#888780', isWalking, phase)}</svg>`
 }
 
 // The status line: the 5-hour and weekly limits with their reset countdowns, redrawn once a
