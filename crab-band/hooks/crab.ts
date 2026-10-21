@@ -7,7 +7,7 @@
 // legend gives a character's colour ("accent" is the outfit's accent colour). A pixel belongs to a
 // group that moves as one: bd the body (bobs), la / lb the two leg pairs (step in turn), cl / cr the
 // arms, eye the eyes, and each outfit's props (it, star, bub, pop, boom, smoke, pa, pb, pc, loop,
-// flag, can, drop, nt, nt2, needle).
+// flag, can, drop, nt, nt2, needle, hair, skirt, sp, ht).
 
 type Part = { x: number; y: number; group: string; rows: string[]; legend: Record<string, string> }
 type Art = {
@@ -326,6 +326,142 @@ export const ART: Art =
         }
       ]
     },
+    "doll": {
+      "parts": [
+        {
+          "x": 4,
+          "y": 5,
+          "group": "hair",
+          "rows": [
+            "......hhhhhhhhhh......",
+            "....hhhhhhhhhhhhhh....",
+            "...hhhHHhhhhhhhhhhh...",
+            "..hhhHhhhhhhhhhhhhhh..",
+            "..hhHhhhhhhhhhhhhhhh..",
+            ".hhhhhhhhhhhhhhhhhhhh.",
+            ".hHh..............hhd.",
+            ".hHd..............dhh.",
+            ".hHd..............dhh.",
+            ".hHd..............dhh.",
+            ".hHd..............dhh.",
+            ".hHd..............dhh.",
+            ".hHd..............dhh.",
+            ".hHd..............dhh.",
+            "hhd................dhh",
+            "hd..................dh"
+          ],
+          "legend": {
+            "h": "#F2CF5B",
+            "H": "#FBE7A1",
+            "d": "#D4A93A"
+          }
+        },
+        {
+          "x": 19,
+          "y": 2,
+          "group": "bd",
+          "rows": [
+            "aa...aa",
+            "aaa.aaa",
+            "aaaAaaa",
+            "aaa.aaa",
+            "aa...aa"
+          ],
+          "legend": {
+            "a": "accent",
+            "A": "#A3165F"
+          }
+        },
+        {
+          "x": 8,
+          "y": 11,
+          "group": "bd",
+          "rows": [
+            "k"
+          ],
+          "legend": {
+            "k": "#1F1E1D"
+          }
+        },
+        {
+          "x": 21,
+          "y": 11,
+          "group": "bd",
+          "rows": [
+            "k"
+          ],
+          "legend": {
+            "k": "#1F1E1D"
+          }
+        },
+        {
+          "x": 9,
+          "y": 15,
+          "group": "bd",
+          "rows": [
+            "pp"
+          ],
+          "legend": {
+            "p": "#F59BC3"
+          }
+        },
+        {
+          "x": 19,
+          "y": 15,
+          "group": "bd",
+          "rows": [
+            "pp"
+          ],
+          "legend": {
+            "p": "#F59BC3"
+          }
+        },
+        {
+          "x": 26,
+          "y": 0,
+          "group": "sp",
+          "rows": [
+            ".p.",
+            "pwp",
+            ".p."
+          ],
+          "legend": {
+            "w": "#FFFFFF",
+            "p": "#F7A8D0"
+          }
+        },
+        {
+          "x": 0,
+          "y": 5,
+          "group": "ht",
+          "rows": [
+            "aa.aa",
+            "aaaaa",
+            ".aaa.",
+            "..a.."
+          ],
+          "legend": {
+            "a": "accent"
+          }
+        },
+        {
+          "x": 5,
+          "y": 18,
+          "group": "skirt",
+          "rows": [
+            "..AAAAAAAAAAAAAAAA..",
+            "..aalaalaalaalaala..",
+            ".aalaalaalaalaalaaa.",
+            "aalaalaalaalaalaalaa"
+          ],
+          "legend": {
+            "a": "accent",
+            "A": "#A3165F",
+            "l": "#F59BC3"
+          }
+        }
+      ]
+    },
     "medium": {
       "parts": [
         {
@@ -590,6 +726,7 @@ export const COSTUME_ACCENT: Record<string, string> = {
   fable: '#7F77DD',
   heavy: '#D85A30',
   careful: '#BA7517',
+  doll: '#E0218A',
   medium: '#378ADD',
   light: '#1D9E75',
   haiku: '#3E9B5F',
@@ -603,6 +740,7 @@ export const COSTUME_NAME: Record<string, string> = {
   fable: 'wizard',
   heavy: 'scientist',
   careful: 'painter',
+  doll: 'doll',
   medium: 'cowboy',
   light: 'ninja',
   haiku: 'gardener',

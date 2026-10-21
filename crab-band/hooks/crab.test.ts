@@ -41,6 +41,11 @@ describe('the ART block', () => {
     }
   })
 
+  test("the doll wears her hair, a skirt, a sparkle and a heart, each a group of its own", () => {
+    const m = crabMarkup('doll', COSTUME_ACCENT.doll ?? '', true)
+    for (const cls of ['hair', 'skirt', 'sp', 'ht']) expect(m).toContain(`<g class="${cls}">`)
+  })
+
   test('the outfits match the names and accents', () => {
     expect(Object.keys(ART.outfits).sort()).toEqual(Object.keys(COSTUME_NAME).sort())
     expect(Object.keys(ART.outfits).sort()).toEqual(Object.keys(COSTUME_ACCENT).sort())
