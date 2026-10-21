@@ -2,6 +2,8 @@ import { expect, mock, test } from 'claude-code/testing'
 import type { Engine } from 'claude-code/testing'
 import type { On } from 'claude-code'
 
+import { routineOf } from '../hooks/moves'
+
 const PLUGIN = 'crab-band'
 const PANE = 'crab-agents'
 const NOW = Date.parse('2026-10-19T08:00:00Z')
@@ -77,3 +79,17 @@ for (const surface of ['terminal', 'desktop'] as const) {
     expect(after).toContain('✓ Review the spec')
   })
 }
+
+test("desktop: the pane's crabs are the band's views drawn 2.1 times as large", async ($, on) => {
+  await start($, on, [], [])
+  await $.agent.spawn({ tool_use_id: 't1', prompt: 'p', description: 'Review the spec', subagentType: 'general-purpose', parentModel: 'claude-opus-5-5' } as never)
+  const ui = await $.ui.mount({ plugin: PLUGIN, surface: 'desktop', component: 'Pane', requestId: PANE, props: PANE_PROPS })
+  const crabs = (await ui.findAll({ type: 'Svg' })).map(el => el.props as { alt?: string; width?: number; height?: number; source?: string })
+  await ui.unmount()
+  for (const [alt, costume] of [['crab crab', 'other'], ['musician crab', 'sonnet']] as const) {
+    const [x, y, w, h] = routineOf(costume).box
+    const crab = crabs.find(c => c.alt === alt)
+    expect([alt, crab?.width, crab?.height]).toEqual([alt, Math.round(w * 2.1), Math.round(h * 2.1)])
+    expect(crab?.source).toContain(`viewBox="${x} ${y} ${w} ${h}"`)
+  }
+})

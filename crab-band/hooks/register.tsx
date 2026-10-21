@@ -6,6 +6,7 @@ import { costumeFor, savvyTier } from './costume'
 import { COSTUME_ACCENT, COSTUME_NAME, crabCss, crabMarkup } from './crab'
 import { isVisible, mainMeta, mainRowText, mainTitle, rowText, runMeta, runTitle } from './format'
 import { formatLimits } from './limits-format'
+import { routineOf } from './moves'
 import { PLAN_TOOL, TODO_TOOL, WRAP_TOOL, applyPlanCall, applyTodos, finishAll, isFinished } from './plan'
 
 const IDLE: Main = { model: '', isWorking: false, turnStartedAt: 0, contextTokens: 0, plan: [] }
@@ -16,12 +17,13 @@ const main = atom({ plugin: 'crab-band', key: 'main' } as const, IDLE)
 
 const MAX_ROWS = 5
 const MAX_KEPT = 50
-// One px per cell of the crab's 30-cell grid (two device pixels on a Retina screen), so its edges stay even.
-const CRAB_W = 30
-// The agents pane: the same crabs, about twice the size, on a plain background.
+// The agents pane: the same crabs, about twice the size, on a plain background. In the band a grid
+// unit is one px (two device pixels on a Retina screen), so the crab's edges stay even; in the pane,
+// the 30-unit crab is BIG_W px wide.
 const PANE = 'crab-agents'
 const PANE_TITLE = 'Agents'
 const BIG_W = 63
+const BIG_UNIT = BIG_W / 30
 const MAX_FINISHED = 20
 
 const MARK: Record<RunStatus, string> = { running: '●', done: '✓', failed: '✗' }
@@ -30,14 +32,18 @@ const COLOR: Record<RunStatus, string> = { running: '#8f8cf4', done: '#5fbf8f', 
 const costumeOf = (run: Run): string => costumeFor(savvyTier(run.type ?? ''), run.type ?? '', run.model, run.effort)
 const mainCostume = (m: Main): string => costumeFor('other', 'main', m.model, m.effort)
 
-// One crab as its own SVG, `width` px wide, the costume's prop moving while the agent runs. The
-// view leaves room above the crab for the musician's rising notes, and below it for his headspin
-// and freeze, which reach about 5 units under a standing crab; `phase` (seconds the agent has
-// run) keeps his dance going across the once-a-second redraw.
-const crabTall = (costume: string): number => (costume === 'sonnet' ? 37 : 32)
-const crabHeight = (costume: string, width = CRAB_W): number => Math.round((width * crabTall(costume)) / 30)
-const crabSvg = (costume: string, isWalking: boolean, phase: number, width = CRAB_W): string =>
-  `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${crabHeight(costume, width)}" viewBox="0 -4 30 ${crabTall(costume)}" shape-rendering="crispEdges">${crabCss(costume)}${crabMarkup(costume, COSTUME_ACCENT[costume] ?? '#888780', isWalking, phase)}</svg>`
+// One crab as its own SVG, `unit` px per grid unit, dancing while the agent runs. The view is its
+// dance's box, which holds every frame of the routine, props and all; `phase` (seconds the agent
+// has run) keeps the dance going across the once-a-second redraw.
+const crabSize = (costume: string, unit = 1): [number, number] => {
+  const [, , w, h] = routineOf(costume).box
+  return [Math.round(w * unit), Math.round(h * unit)]
+}
+const crabSvg = (costume: string, isWalking: boolean, phase: number, unit = 1): string => {
+  const [x, y, w, h] = routineOf(costume).box
+  const [width, height] = crabSize(costume, unit)
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="${x} ${y} ${w} ${h}" shape-rendering="crispEdges">${crabCss(costume)}${crabMarkup(costume, COSTUME_ACCENT[costume] ?? '#888780', isWalking, phase)}</svg>`
+}
 
 // The status line: the 5-hour and weekly limits with their reset countdowns, redrawn once a
 // minute so the countdowns keep moving while idle.
@@ -245,10 +251,10 @@ export const register: Register = on => {
       Svg && (
         <Svg
           key={key}
-          source={crabSvg(costume, isWalking, phase, BIG_W)}
+          source={crabSvg(costume, isWalking, phase, BIG_UNIT)}
           alt={`${COSTUME_NAME[costume] ?? 'crab'} crab`}
-          width={BIG_W}
-          height={crabHeight(costume, BIG_W)}
+          width={crabSize(costume, BIG_UNIT)[0]}
+          height={crabSize(costume, BIG_UNIT)[1]}
         />
       )
     const agent = (r: Run) => (
@@ -318,8 +324,8 @@ export const register: Register = on => {
           key={key}
           source={crabSvg(costume, isWalking, phase)}
           alt={`${COSTUME_NAME[costume] ?? 'crab'} crab`}
-          width={CRAB_W}
-          height={crabHeight(costume)}
+          width={crabSize(costume)[0]}
+          height={crabSize(costume)[1]}
         />
       )
     const mainMark = m.isWorking ? '●' : isFinished(m.plan) ? '✓' : '○'

@@ -3,6 +3,7 @@ import type { Engine } from 'claude-code/testing'
 import type { On } from 'claude-code'
 
 import { elapsed, modelName } from '../hooks/format'
+import { routineOf } from '../hooks/moves'
 
 const PLUGIN = 'crab-band'
 type Surface = 'terminal' | 'desktop' | 'vscode'
@@ -144,6 +145,24 @@ for (const surface of ['desktop'] as const) {
     expect(during).toEqual(['painter crab'])
   })
 }
+
+test("desktop: each band crab's view is its dance's box, one pixel per grid unit", async ($, on) => {
+  await start($, on, 'desktop')
+  await $.agent.spawn({
+    tool_use_id: 't1',
+    prompt: 'p',
+    description: 'Water the plants',
+    subagentType: 'general-purpose',
+    parentModel: 'claude-opus-5-5',
+  } as never)
+  const ui = await $.ui.mount({ plugin: PLUGIN, surface: 'desktop', ...BAND })
+  const crabs = (await ui.findAll({ type: 'Svg' })).map(el => el.props as { alt?: string; width?: number; height?: number; source?: string })
+  await ui.unmount()
+  const [x, y, w, h] = routineOf('haiku').box
+  const gardener = crabs.find(c => c.alt === 'gardener crab')
+  expect([gardener?.width, gardener?.height]).toEqual([w, h])
+  expect(gardener?.source).toContain(`width="${w}" height="${h}" viewBox="${x} ${y} ${w} ${h}"`)
+})
 
 // VS Code pins a "From the <plugin> plugin" mark on a mod's band and paints it over the slash-command
 // menu, so there the band shows only while something is at work.
