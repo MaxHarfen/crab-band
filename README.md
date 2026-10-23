@@ -20,6 +20,8 @@
 
 - **`/agents-info`, a pane with big crabs.** The same agents on a plain background, about twice the size: the main session, the subagents running now, and every subagent that finished this session (the band keeps a finished one only 30 seconds). `/agents-info` opens or closes it, `/agents-info open` only opens it. It runs at once, even typed while Claude is working, without stopping the turn. While the pane is on screen the band steps aside, so each agent has one crab; it comes back when the pane closes or sits behind another tab.
 
+There is also [crab-band for claude.ai](#crab-band-for-claudeai-chrome-extension), a separate Chrome extension that brings the crab to claude.ai in the browser.
+
 The band in the desktop app (an illustration, not a screenshot):
 
 <img src="docs/band-illustration.png" alt="Three band rows: a scientist crab, a musician crab and an explorer crab, each followed by a status dot, the task, the model, context and time" width="520">
@@ -64,6 +66,14 @@ claude plugin install crab-band --marketplace MaxHarfen/crab-band
 
 Start a new session afterwards. The status line and the band appear by themselves; `/agents-info` opens the pane.
 
+## crab-band for claude.ai (Chrome extension)
+
+A separate Chrome extension in [`chrome/`](chrome/) brings the crab to claude.ai in the browser. While Claude answers, a crab
+dances and walks slowly under the reply, dressed for the model and effort in the model picker, and the 5-hour and 7-day
+limits show next to the picker. It uses no tokens, asks for no permissions and runs only on claude.ai. It installs on its
+own, in Chrome, and has nothing to do with the plugin install above. [chrome/README.md](chrome/README.md) says what it reads
+and how to load it; [chrome/PRIVACY.md](chrome/PRIVACY.md) is its privacy policy.
+
 ## Developing
 
 The plugin is `crab-band/`: `hooks/register.tsx` holds every hook, `hooks/crab.ts` the crab art (the ART block) and the props'
@@ -74,6 +84,9 @@ each leg pair over a 4-second loop, and its `box` is the view that holds every f
 `python3 docs/make_crab_gif.py docs` (it needs Pillow) to redraw the GIFs above from them; `python3 docs/make_crab_gif.py --check`
 draws nothing and fails if any frame leaves its routine's box. The GIF script keeps a Python copy of the props' motion only, so a
 new prop or prop animation needs adding there too.
+
+The Chrome extension imports `crab.ts`, `moves.ts`, `costume.ts` and `limits-format.ts` from `crab-band/hooks/` when it is
+built, so both draw the same crabs. After changing any of them, also run `npm test` in `chrome/`.
 
 ## License
 
