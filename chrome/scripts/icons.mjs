@@ -60,8 +60,12 @@ const png = (size, pixel) => {
 }
 
 mkdirSync(join(root, 'icons'), { recursive: true })
+// The store's 128 px icon is 96 px of art with 16 px of transparent padding on each side, at a
+// whole-number scale; the small ones fill their square.
+const artOf = size => (size >= 128 ? size - 32 : size)
+
 for (const size of SIZES) {
-  const fit = size / Math.max(w, h)
+  const fit = artOf(size) / Math.max(w, h)
   const scale = size >= 128 ? Math.floor(fit) : fit
   const ox = (size - w * scale) / 2
   const oy = (size - h * scale) / 2
