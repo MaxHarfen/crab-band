@@ -1,5 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
 import { outfitFromLabel, parseModelLabel } from '../src/outfit.ts'
 
 test('every row of the spec table', () => {
@@ -29,4 +30,9 @@ test('the effort is the trailing label, longest first, without the "Model:" pref
 
 test('the picker says "Extra" for xhigh (live check, 2026-10-23)', () => {
   assert.deepEqual(parseModelLabel('Model: Opus 5.5 Extra'), { model: 'Opus 5.5', effort: 'xhigh' })
+})
+
+test('the README names the effort labels the picker shows (live check: Low, Medium, High, Extra, Max)', () => {
+  const efforts = [...readFileSync('README.md', 'utf8').matchAll(/^\| Opus, effort (.+?) \|/gm)].map(m => m[1])
+  assert.deepEqual(efforts.sort(), ['Extra', 'High', 'Low', 'Max', 'Medium'])
 })

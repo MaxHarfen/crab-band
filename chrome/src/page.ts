@@ -8,6 +8,16 @@ export const SEL = {
   model: '[data-testid="model-selector-dropdown"]',
 } as const
 
+// What the page's MutationObserver needs to see for `readPage` to stay current: elements coming and
+// going (the Stop button, a re-rendered footer row) and the three attributes it reads. No text: the
+// extension reads none, so a streamed token wakes nothing.
+export const OBSERVE: MutationObserverInit = {
+  subtree: true,
+  childList: true,
+  attributes: true,
+  attributeFilter: ['data-testid', 'data-is-streaming', 'aria-label'],
+}
+
 // No chat text: whether Claude is working, the model picker's label, and where to draw.
 export type PageState = {
   working: boolean

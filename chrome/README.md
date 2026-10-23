@@ -13,7 +13,7 @@ It costs no tokens: the extension draws the crab itself, from the page, and neve
 |---|---|
 | Fable | wizard |
 | Opus, effort Max | scientist |
-| Opus, effort Extra high | painter |
+| Opus, effort Extra | painter |
 | Opus, effort High | doll |
 | Opus, effort Medium | cowboy |
 | Opus, effort Low | ninja |

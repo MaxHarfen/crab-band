@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { orgIdFromCookie, readPage } from '../src/page.ts'
+import { OBSERVE, orgIdFromCookie, readPage } from '../src/page.ts'
 import { newDoc } from './fixtures.ts'
 
 test('the Stop button means working, even before streaming starts', () => {
@@ -28,4 +28,23 @@ test('the org id comes from lastActiveOrg and must be a UUID', () => {
   assert.equal(orgIdFromCookie(`a=1; lastActiveOrg=${id}; b=2`), id)
   assert.equal(orgIdFromCookie('lastActiveOrg=not-a-uuid'), null)
   assert.equal(orgIdFromCookie(''), null)
+})
+
+test('the page observer wakes for what readPage reads, not for streamed text or other attributes', () => {
+  const doc = newDoc({ steps: ['Run a 20-second demo computation loop'] })
+  const records: unknown[] = []
+  const observer = new (doc.defaultView as any).MutationObserver((rs: unknown[]) => records.push(...rs))
+  observer.observe(doc.documentElement, OBSERVE)
+  const reply = doc.querySelector('[data-testid="assistant-message"]')!
+  ;(reply.querySelector('[role="status"]')!.firstChild as Text).data = 'more streamed text'
+  reply.setAttribute('class', 'a-class-we-never-read')
+  records.push(...observer.takeRecords())
+  assert.equal(records.length, 0)
+  reply.setAttribute('data-is-streaming', 'true')
+  doc.querySelector('[data-testid="model-selector-dropdown"]')!.setAttribute('aria-label', 'Model: Sonnet 5.5')
+  doc.querySelector('[data-testid="chat-footer-row"]')!.removeAttribute('data-testid')
+  doc.body.append(doc.createElement('button'))
+  records.push(...observer.takeRecords())
+  observer.disconnect()
+  assert.equal(records.length, 4)
 })
