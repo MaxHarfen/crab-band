@@ -39,6 +39,13 @@ test('done: the crab stands still and the step goes', () => {
   assert.doesNotMatch(svgOf(doc), / run"/)
   assert.equal(stepOf(doc).hidden, true)
 })
+test('the crab shows even though claude.ai hides the row it sits in', () => {
+  const { doc, ctl } = setup({ stop: true })
+  ctl.tick()
+  const host = doc.querySelector(CRAB) as HTMLElement
+  assert.equal(doc.defaultView!.getComputedStyle(host.parentElement!).visibility, 'hidden')
+  assert.equal(doc.defaultView!.getComputedStyle(host).visibility, 'visible')
+})
 test('no footer row: no crab, and a mounted crab is removed', () => {
   assert.equal((() => { const { doc, ctl } = setup({ footer: false }); ctl.tick(); return doc.querySelectorAll(CRAB).length })(), 0)
   const { doc, ctl } = setup({})

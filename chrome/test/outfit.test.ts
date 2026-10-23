@@ -7,6 +7,7 @@ test('every row of the spec table', () => {
     ['Model: Fable 5.1', 'fable'],
     ['Model: Opus 5.5 Max', 'heavy'],
     ['Model: Opus 5.5 Extra high', 'careful'],
+    ['Model: Opus 5.5 Extra', 'careful'],
     ['Model: Opus 5.5 High', 'doll'],
     ['Model: Opus 5.5 Medium', 'medium'],
     ['Model: Opus 5.5 Low', 'light'],
@@ -24,4 +25,8 @@ test('the effort is the trailing label, longest first, without the "Model:" pref
   assert.deepEqual(parseModelLabel('Model: Opus 5.5 Extra high'), { model: 'Opus 5.5', effort: 'xhigh' })
   assert.deepEqual(parseModelLabel('Opus 5.5 High'), { model: 'Opus 5.5', effort: 'high' })
   assert.deepEqual(parseModelLabel('Haiku 5.5'), { model: 'Haiku 5.5' })
+})
+
+test('the picker says "Extra" for xhigh (live check, 2026-10-23)', () => {
+  assert.deepEqual(parseModelLabel('Model: Opus 5.5 Extra'), { model: 'Opus 5.5', effort: 'xhigh' })
 })

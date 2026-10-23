@@ -15,7 +15,11 @@ export const pageHtml = (f: Fixture): string => {
     .join('')
   return [
     `<div data-testid="assistant-message" data-is-streaming="${streaming}">${turns}<p>A synthetic reply.</p></div>`,
-    footer ? '<div data-testid="chat-footer-row"><div data-testid="chat-footer-spark" data-state="hidden"></div></div>' : '',
+    // claude.ai keeps the footer row inside an `invisible` wrapper while its spark is hidden (live check, 2026-10-23).
+    footer
+      ? '<div data-testid="transcript-trailing"><div class="flow-root"><div class="invisible" style="visibility:hidden">' +
+        '<div data-testid="chat-footer-row"><div data-testid="chat-footer-spark" data-state="hidden"></div></div></div></div></div>'
+      : '',
     stop
       ? '<button data-testid="chat-input-stop" aria-label="Stop response"></button>'
       : '<button data-testid="chat-input-send" aria-label="Send message"></button>',

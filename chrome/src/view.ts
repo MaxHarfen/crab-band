@@ -9,7 +9,8 @@ export type CrabView = { host: HTMLElement; render(s: CrabState): void }
 export type LimitsView = { host: HTMLElement; render(text: string | null, title: string): void }
 
 const CRAB_STYLE = [
-  ':host{display:inline-flex;align-items:center;gap:8px;min-width:0;max-width:100%;vertical-align:middle}',
+  // claude.ai keeps the footer row `invisible` while its spark is hidden; the crab shows regardless.
+  ':host{display:inline-flex;align-items:center;gap:8px;min-width:0;max-width:100%;vertical-align:middle;visibility:visible}',
   '[hidden]{display:none!important}',
   '.crab{display:inline-flex;flex:none;line-height:0}',
   '.crab svg{display:block;image-rendering:pixelated}',

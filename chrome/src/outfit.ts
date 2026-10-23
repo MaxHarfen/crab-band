@@ -1,9 +1,11 @@
 import { costumeFor } from '../../crab-band/hooks/costume.ts'
 
 // The model picker's effort labels, as claude.ai writes them in English, and the effort crab-band
-// knows them by. Longest label first, so "Extra high" is not read as "High".
+// knows them by. Its menu says Low, Medium, High, Extra and Max (seen 2026-10-23); "Extra high" is
+// kept in case the label grows. Longest label first, so "Extra high" is not read as "High".
 export const EFFORTS: ReadonlyArray<readonly [string, string]> = [
   ['extra high', 'xhigh'],
+  ['extra', 'xhigh'],
   ['max', 'max'],
   ['high', 'high'],
   ['medium', 'medium'],
