@@ -50,3 +50,8 @@ test('the drawn crab has its outfit, its groups and its dance in the shadow root
   assert.ok(root.querySelector('svg g.c-medium.run g.dn g.bd rect'), 'the crab is drawn')
   assert.match([...root.querySelectorAll('style')].map(s => s.textContent).join('\n'), /@keyframes mv-medium-/)
 })
+test('the walk is slow: 16 s there and back (Max, live check)', () => {
+  const doc = newDoc({}); const v = createCrabView(doc); doc.body.append(v.host)
+  const css = [...v.host.shadowRoot!.querySelectorAll('style')].map(s => s.textContent).join('\n')
+  assert.match(css, /animation:crab-walk 16s /)
+})

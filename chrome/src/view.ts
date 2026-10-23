@@ -11,7 +11,7 @@ export type LimitsView = { host: HTMLElement; render(text: string | null, title:
 // The host fills the rest of the footer row, and the crab walks it sideways, there and back, while
 // Claude works (dancing as it goes); done, it stands at the start, beside claude.ai's spark.
 // claude.ai keeps the footer row `invisible` while its spark is hidden; the crab shows regardless.
-const WALK_SECONDS = 12
+const WALK_SECONDS = 16
 const CRAB_STYLE = [
   ':host{display:block;flex:1 1 auto;min-width:0;container-type:inline-size;visibility:visible;line-height:0}',
   '.crab{display:inline-block;line-height:0}',
