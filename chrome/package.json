@@ -1,0 +1,17 @@
+{
+  "name": "crab-band-chrome",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Pixel crabs that dance while Claude answers on claude.ai. Unofficial: not made or endorsed by Anthropic.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "test": "node --import ./test/resolve-ts.mjs --test test/*.test.ts",
+    "build": "node scripts/build.mjs",
+    "icons": "node scripts/icons.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "happy-dom": "21.0.4"
+  }
+}

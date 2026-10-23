@@ -4,3 +4,5 @@
 .claude-plugin/types/
 */.claude-plugin/types/
 sheet-*.png
+chrome/dist/
+chrome/node_modules/
