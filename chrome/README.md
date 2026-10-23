@@ -3,8 +3,8 @@
 Unofficial: not made or endorsed by Anthropic.
 
 A Chrome extension that brings [crab-band](https://github.com/MaxHarfen/crab-band)'s pixel crab to claude.ai in the browser. While Claude
-answers, a crab dances at the end of the reply, dressed for the model and effort picked in the model picker, with
-the step Claude is on beside it. When the reply is done, the crab stands still. The 5-hour and 7-day usage limits
+answers, a crab dances at the end of the reply, dressed for the model and effort picked in the model picker, and
+walks sideways across the empty row under it, there and back. When the reply is done, the crab stands still. The 5-hour and 7-day usage limits
 show as a short line next to the model picker (`5h 6% · 7d 91%`; hover it for the reset times).
 
 It costs no tokens: the extension draws the crab itself, from the page, and never calls Claude.
@@ -37,9 +37,8 @@ icon on the extension's card.
 
 ## What it reads and sends
 
-- **Reads** claude.ai's page: whether the Stop button is there, the step lines of the reply being written, the
-  model picker's label, and where the footer row under the last reply is. It reads no chat text beyond the step
-  line it shows.
+- **Reads** claude.ai's page: whether the Stop button is there (or the last reply is still streaming), the model
+  picker's label, and where the footer row under the last reply is. It reads no chat text.
 - **Reads** the `lastActiveOrg` cookie, to know which organization's limits to ask for.
 - **Sends** one request: `GET /api/organizations/<that org>/usage` on claude.ai, the same request claude.ai's
   Settings page makes, with your own session. It runs when the page loads, when a reply ends, and every 5 minutes

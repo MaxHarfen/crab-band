@@ -14,23 +14,26 @@ test('the svg dances only while working, in its outfit, in its own box', () => {
 })
 test('keeps the same svg while costume and working are unchanged', () => {
   const doc = newDoc({}); const v = createCrabView(doc); doc.body.append(v.host)
-  v.render({ costume: 'medium', working: true, step: 'a', phase: 0 })
+  v.render({ costume: 'medium', working: true, phase: 0 })
   const first = v.host.shadowRoot!.querySelector('svg')
-  v.render({ costume: 'medium', working: true, step: 'b', phase: 3 })
+  v.render({ costume: 'medium', working: true, phase: 3 })
   assert.equal(v.host.shadowRoot!.querySelector('svg'), first)
-  v.render({ costume: 'sonnet', working: true, step: 'b', phase: 3 })
+  v.render({ costume: 'sonnet', working: true, phase: 3 })
   assert.notEqual(v.host.shadowRoot!.querySelector('svg'), first)
 })
-test('step text is text, not markup', () => {
+test('the crab walks the row only while working, with no text beside it', () => {
   const doc = newDoc({}); const v = createCrabView(doc); doc.body.append(v.host)
-  v.render({ costume: 'other', working: true, step: '<img src=x onerror=alert(1)>', phase: 0 })
-  assert.equal(v.host.shadowRoot!.querySelector('img'), null)
-  assert.equal(v.host.shadowRoot!.querySelector('.step')!.textContent, '<img src=x onerror=alert(1)>')
+  const crab = () => v.host.shadowRoot!.querySelector('.crab')!
+  v.render({ costume: 'other', working: true, phase: 0 })
+  assert.equal(crab().classList.contains('walk'), true)
+  v.render({ costume: 'other', working: false, phase: 0 })
+  assert.equal(crab().classList.contains('walk'), false)
+  assert.equal(v.host.shadowRoot!.querySelector('.step'), null)
 })
-test('no step hides the step line', () => {
+test('reduced motion stops the walk as well as the dance', () => {
   const doc = newDoc({}); const v = createCrabView(doc); doc.body.append(v.host)
-  v.render({ costume: 'other', working: false, step: null, phase: 0 })
-  assert.equal((v.host.shadowRoot!.querySelector('.step') as HTMLElement).hidden, true)
+  const css = [...v.host.shadowRoot!.querySelectorAll('style')].map(s => s.textContent).join('\n')
+  assert.match(css, /@media \(prefers-reduced-motion: reduce\)\{[^}]*\.walk\{animation:none/)
 })
 test('limits: text and title, hidden when null', () => {
   const doc = newDoc({}); const v = createLimitsView(doc); doc.body.append(v.host)
@@ -42,7 +45,7 @@ test('limits: text and title, hidden when null', () => {
 })
 test('the drawn crab has its outfit, its groups and its dance in the shadow root', () => {
   const doc = newDoc({}); const v = createCrabView(doc); doc.body.append(v.host)
-  v.render({ costume: 'medium', working: true, step: null, phase: 0 })
+  v.render({ costume: 'medium', working: true, phase: 0 })
   const root = v.host.shadowRoot!
   assert.ok(root.querySelector('svg g.c-medium.run g.dn g.bd rect'), 'the crab is drawn')
   assert.match([...root.querySelectorAll('style')].map(s => s.textContent).join('\n'), /@keyframes mv-medium-/)

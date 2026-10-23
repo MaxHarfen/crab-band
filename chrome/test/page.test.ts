@@ -12,11 +12,9 @@ test('streaming alone also means working', () => {
 test('neither means done', () => {
   assert.equal(readPage(newDoc({})).working, false)
 })
-test('the step is the last TurnStatus of the last reply, only while working', () => {
-  const steps = ['Finding a way to simulate working', 'Run a 20-second demo computation loop']
-  assert.equal(readPage(newDoc({ stop: true, steps })).step, 'Run a 20-second demo computation loop')
-  assert.equal(readPage(newDoc({ stop: false, steps })).step, null)
-  assert.equal(readPage(newDoc({ stop: true })).step, null)
+test('reads no chat text: only working, the model label and where to draw, even mid-reply', () => {
+  const s = readPage(newDoc({ stop: true, steps: ['Run a 20-second demo computation loop'] }))
+  assert.deepEqual(Object.keys(s).sort(), ['footerRow', 'modelButton', 'modelLabel', 'working'])
 })
 test('the model label loses its "Model:" prefix; no picker is null', () => {
   assert.equal(readPage(newDoc({ model: 'Sonnet 5.5' })).modelLabel, 'Sonnet 5.5')

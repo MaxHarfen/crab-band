@@ -6,26 +6,17 @@ export const SEL = {
   footerRow: '[data-testid="chat-footer-row"]',
   spark: '[data-testid="chat-footer-spark"]',
   model: '[data-testid="model-selector-dropdown"]',
-  turnStatus: '[data-cds="TurnStatus"]',
 } as const
 
+// No chat text: whether Claude is working, the model picker's label, and where to draw.
 export type PageState = {
   working: boolean
-  step: string | null
   modelLabel: string | null
   footerRow: Element | null
   modelButton: Element | null
 }
 
 const last = <T extends Element>(list: ArrayLike<T> | undefined): T | null => (list && list.length > 0 ? list[list.length - 1] : null)
-
-// The step Claude is on: the last TurnStatus of the reply, its status line. Before the first tool
-// step this is the thinking summary, which claude.ai shows the same way.
-const stepOf = (reply: Element | null): string | null => {
-  const turn = last(reply?.querySelectorAll(SEL.turnStatus))
-  const text = last(turn?.querySelectorAll('[role="status"]'))?.textContent?.trim()
-  return text ? text : null
-}
 
 // The row under the last reply where claude.ai keeps its spark; the last such row, else the last row.
 const footerRowOf = (doc: Document): Element | null => {
@@ -40,7 +31,6 @@ export const readPage = (doc: Document): PageState => {
   const label = modelButton?.getAttribute('aria-label')?.replace(/^\s*model:/i, '').trim()
   return {
     working,
-    step: working ? stepOf(reply) : null,
     modelLabel: label ? label : null,
     footerRow: footerRowOf(doc),
     modelButton,

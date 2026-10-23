@@ -18,18 +18,18 @@ const setup = (f: Fixture, cookie = 'lastActiveOrg=0b7e9c2a-1111-4222-8333-44445
 }
 const settle = () => new Promise(resolve => setTimeout(resolve, 0))
 const svgOf = (doc: Document): string => doc.querySelector(CRAB)!.shadowRoot!.querySelector('.crab')!.innerHTML
-const stepOf = (doc: Document) => doc.querySelector(CRAB)!.shadowRoot!.querySelector('.step') as HTMLElement
+const walking = (doc: Document): boolean => doc.querySelector(CRAB)!.shadowRoot!.querySelector('.crab')!.classList.contains('walk')
 
-test('working: one crab in the footer row, dancing, with the step', () => {
+test('working: one crab in the footer row, dancing as it walks', () => {
   const { doc, ctl } = setup({ stop: true, steps: ['Run a 20-second demo computation loop'] })
   ctl.tick()
   const hosts = doc.querySelectorAll(CRAB)
   assert.equal(hosts.length, 1)
   assert.equal(hosts[0].parentElement, doc.querySelector(FOOTER))
   assert.match(hosts[0].shadowRoot!.innerHTML, /c-medium run/)
-  assert.equal(hosts[0].shadowRoot!.querySelector('.step')!.textContent, 'Run a 20-second demo computation loop')
+  assert.equal(walking(doc), true)
 })
-test('done: the crab stands still and the step goes', () => {
+test('done: the crab stands still', () => {
   const { doc, ctl, setPage } = setup({ stop: true, steps: ['Run a 20-second demo computation loop'] })
   ctl.tick()
   setPage({ stop: false, steps: ['Run a 20-second demo computation loop'] })
@@ -37,7 +37,7 @@ test('done: the crab stands still and the step goes', () => {
   assert.equal(doc.querySelectorAll(CRAB).length, 1)
   assert.match(svgOf(doc), /class="c-medium"/)
   assert.doesNotMatch(svgOf(doc), / run"/)
-  assert.equal(stepOf(doc).hidden, true)
+  assert.equal(walking(doc), false)
 })
 test('the crab shows even though claude.ai hides the row it sits in', () => {
   const { doc, ctl } = setup({ stop: true })

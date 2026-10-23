@@ -52,7 +52,6 @@ export const createController = (deps: Deps): { tick(): void; refreshLimits(): P
         crab.render({
           costume: outfitFromLabel(page.modelLabel),
           working: page.working,
-          step: page.step,
           phase: page.working ? (deps.now() - since) / 1000 : 0,
         })
         if (row.lastElementChild !== crab.host) row.append(crab.host)

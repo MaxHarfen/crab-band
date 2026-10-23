@@ -4,17 +4,21 @@ import { crabSvg } from './crab-svg.ts'
 // styles and the crab's never touch. A render writes only what changed: the page's MutationObserver
 // sees every write, and the dance would restart if the SVG were redrawn.
 
-export type CrabState = { costume: string; working: boolean; step: string | null; phase: number }
+export type CrabState = { costume: string; working: boolean; phase: number }
 export type CrabView = { host: HTMLElement; render(s: CrabState): void }
 export type LimitsView = { host: HTMLElement; render(text: string | null, title: string): void }
 
+// The host fills the rest of the footer row, and the crab walks it sideways, there and back, while
+// Claude works (dancing as it goes); done, it stands at the start, beside claude.ai's spark.
+// claude.ai keeps the footer row `invisible` while its spark is hidden; the crab shows regardless.
+const WALK_SECONDS = 12
 const CRAB_STYLE = [
-  // claude.ai keeps the footer row `invisible` while its spark is hidden; the crab shows regardless.
-  ':host{display:inline-flex;align-items:center;gap:8px;min-width:0;max-width:100%;vertical-align:middle;visibility:visible}',
-  '[hidden]{display:none!important}',
-  '.crab{display:inline-flex;flex:none;line-height:0}',
+  ':host{display:block;flex:1 1 auto;min-width:0;container-type:inline-size;visibility:visible;line-height:0}',
+  '.crab{display:inline-block;line-height:0}',
+  `.crab.walk{animation:crab-walk ${WALK_SECONDS}s ease-in-out infinite}`,
+  '@keyframes crab-walk{0%,100%{transform:translateX(0)}50%{transform:translateX(calc(100cqw - 100%))}}',
   '.crab svg{display:block;image-rendering:pixelated}',
-  '.step{min-width:0;font-size:12px;line-height:16px;color:inherit;opacity:.7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
+  '@media (prefers-reduced-motion: reduce){.walk{animation:none!important}}',
 ].join('\n')
 
 const LIMITS_STYLE = 'font:11px/16px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:inherit;opacity:.7;white-space:nowrap'
@@ -32,27 +36,17 @@ export const createCrabView = (doc: Document): CrabView => {
   style.textContent = CRAB_STYLE
   const crab = doc.createElement('span')
   crab.className = 'crab'
-  const step = doc.createElement('span')
-  step.className = 'step'
-  step.hidden = true
-  root.append(style, crab, step)
+  root.append(style, crab)
 
   let drawn: { costume: string; working: boolean } | null = null
-  let text = ''
   return {
     host,
     render(s) {
       if (drawn === null || drawn.costume !== s.costume || drawn.working !== s.working) {
         crab.innerHTML = crabSvg(s.costume, s.working, s.phase)
+        if (drawn === null || drawn.working !== s.working) crab.classList.toggle('walk', s.working)
         drawn = { costume: s.costume, working: s.working }
       }
-      const next = s.step ?? ''
-      if (next !== text) {
-        step.textContent = next
-        step.title = next
-        text = next
-      }
-      if (step.hidden !== (next === '')) step.hidden = next === ''
     },
   }
 }
