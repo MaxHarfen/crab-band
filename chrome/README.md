@@ -44,7 +44,8 @@ icon on the extension's card.
   Settings page makes, with your own session. It runs when the page loads, when a reply ends, and every 5 minutes
   while the tab is visible.
 
-Nothing else, and nowhere else: no other host, no analytics, no remote code. It runs only on
+Nothing else, and nowhere else: no other host, no analytics, no remote code. The privacy policy is
+[`PRIVACY.md`](PRIVACY.md). It runs only on
 `https://claude.ai/*`, asks for no permissions, and draws only inside its own two elements (each with its own
 shadow root). If claude.ai changes and a selector misses, it draws nothing.
 

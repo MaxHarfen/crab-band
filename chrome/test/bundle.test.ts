@@ -4,7 +4,7 @@ import { execFileSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import { inflateSync } from 'node:zlib'
 
-execFileSync('node', ['scripts/icons.mjs']); execFileSync('node', ['scripts/build.mjs'])
+execFileSync('node', ['scripts/icons.mjs']); execFileSync('node', ['scripts/build.mjs']); execFileSync('node', ['scripts/zip.mjs'])
 const js = readFileSync('dist/content.js', 'utf8')
 const manifest = JSON.parse(readFileSync('dist/manifest.json', 'utf8'))
 
@@ -33,8 +33,8 @@ test('the icons are PNGs of the size they claim', () => {
     assert.equal(png.readUInt32BE(16), size); assert.equal(png.readUInt32BE(20), size)
   }
 })
-test('the licence and notice travel with the package', () => {
-  for (const f of ['LICENSE', 'NOTICE.md', 'README.md']) assert.ok(readFileSync(`dist/${f}`, 'utf8').length > 0, f)
+test('the licence, notice and privacy policy travel with the package', () => {
+  for (const f of ['LICENSE', 'NOTICE.md', 'README.md', 'PRIVACY.md']) assert.ok(readFileSync(`dist/${f}`, 'utf8').length > 0, f)
 })
 
 // The alpha channel of one of our PNGs (RGBA, 8-bit, every row filter 0, which is what icons.mjs writes).
@@ -61,4 +61,12 @@ test('the store icon keeps 16 px of transparent padding around a 96 px crab', ()
     else if (alpha(x, y) > 0) crab++
   }
   assert.ok(crab > 2000, `crab pixels: ${crab}`)
+})
+
+test('the store zip is dist/ as it is, the manifest at its root, nothing hidden', () => {
+  const entries = execFileSync('unzip', ['-Z1', `crab-band-${manifest.version}.zip`], { encoding: 'utf8' }).trim().split('\n').sort()
+  assert.deepEqual(entries, [
+    'LICENSE', 'NOTICE.md', 'PRIVACY.md', 'README.md', 'content.js',
+    'icons/128.png', 'icons/16.png', 'icons/32.png', 'icons/48.png', 'manifest.json',
+  ])
 })

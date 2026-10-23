@@ -23,6 +23,7 @@ for (const [from, to] of [
   ['manifest.json', 'manifest.json'],
   ['icons', 'icons'],
   ['README.md', 'README.md'],
+  ['PRIVACY.md', 'PRIVACY.md'],
   ['../LICENSE', 'LICENSE'],
   ['../crab-band/NOTICE.md', 'NOTICE.md'],
 ]) cpSync(join(root, from), join(dist, to), { recursive: true })
