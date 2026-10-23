@@ -40,3 +40,10 @@ test('limits: text and title, hidden when null', () => {
   v.render(null, '')
   assert.equal(v.host.hidden, true)
 })
+test('the drawn crab has its outfit, its groups and its dance in the shadow root', () => {
+  const doc = newDoc({}); const v = createCrabView(doc); doc.body.append(v.host)
+  v.render({ costume: 'medium', working: true, step: null, phase: 0 })
+  const root = v.host.shadowRoot!
+  assert.ok(root.querySelector('svg g.c-medium.run g.dn g.bd rect'), 'the crab is drawn')
+  assert.match([...root.querySelectorAll('style')].map(s => s.textContent).join('\n'), /@keyframes mv-medium-/)
+})
