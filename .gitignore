@@ -6,3 +6,4 @@
 sheet-*.png
 chrome/dist/
 chrome/node_modules/
+chrome/*.zip
