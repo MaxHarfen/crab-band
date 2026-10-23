@@ -8,10 +8,12 @@ export type CrabState = { costume: string; working: boolean; phase: number }
 export type CrabView = { host: HTMLElement; render(s: CrabState): void }
 export type LimitsView = { host: HTMLElement; render(text: string | null, title: string): void }
 
-// The host fills the rest of the footer row, and the crab walks it sideways, there and back, while
-// Claude works (dancing as it goes); done, it stands at the start, beside claude.ai's spark.
+// The host fills the rest of the footer row, and the crab walks it sideways, there and back, slowly
+// enough not to pull the eye, while Claude works (dancing as it goes). Done, it stops dancing and runs
+// back to the start, beside claude.ai's spark, in RETURN_MS. Nothing moves while Claude is idle.
 // claude.ai keeps the footer row `invisible` while its spark is hidden; the crab shows regardless.
-const WALK_SECONDS = 16
+const WALK_SECONDS = 30
+const RETURN_MS = 2000
 const CRAB_STYLE = [
   ':host{display:block;flex:1 1 auto;min-width:0;container-type:inline-size;visibility:visible;line-height:0}',
   '.crab{display:inline-block;line-height:0}',
@@ -39,12 +41,26 @@ export const createCrabView = (doc: Document): CrabView => {
   root.append(style, crab)
 
   let drawn: { costume: string; working: boolean } | null = null
+  let back: { cancel(): void } | null = null
   return {
     host,
     render(s) {
       if (drawn === null || drawn.costume !== s.costume || drawn.working !== s.working) {
+        // Where the walk had got to, read before the walk stops (the Web Animation adds no attribute,
+        // so the page's MutationObserver does not see the run back).
+        const stopping = drawn !== null && drawn.working && !s.working
+        const from = stopping ? doc.defaultView?.getComputedStyle(crab).transform : undefined
         crab.innerHTML = crabSvg(s.costume, s.working, s.phase)
-        if (drawn === null || drawn.working !== s.working) crab.classList.toggle('walk', s.working)
+        if (drawn === null || drawn.working !== s.working) {
+          if (s.working) {
+            back?.cancel()
+            back = null
+          }
+          crab.classList.toggle('walk', s.working)
+        }
+        if (from && from !== 'none' && typeof crab.animate === 'function') {
+          back = crab.animate([{ transform: from }, { transform: 'none' }], { duration: RETURN_MS, easing: 'ease-in-out' })
+        }
         drawn = { costume: s.costume, working: s.working }
       }
     },

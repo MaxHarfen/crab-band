@@ -50,8 +50,40 @@ test('the drawn crab has its outfit, its groups and its dance in the shadow root
   assert.ok(root.querySelector('svg g.c-medium.run g.dn g.bd rect'), 'the crab is drawn')
   assert.match([...root.querySelectorAll('style')].map(s => s.textContent).join('\n'), /@keyframes mv-medium-/)
 })
-test('the walk is slow: 16 s there and back (Max, live check)', () => {
+test('the walk is slow: 30 s there and back (Max, live check)', () => {
   const doc = newDoc({}); const v = createCrabView(doc); doc.body.append(v.host)
   const css = [...v.host.shadowRoot!.querySelectorAll('style')].map(s => s.textContent).join('\n')
-  assert.match(css, /animation:crab-walk 16s /)
+  assert.match(css, /animation:crab-walk 30s /)
+})
+
+// A crab caught mid-walk, with animate() recorded instead of run.
+const midWalk = (at: string) => {
+  const doc = newDoc({}); const v = createCrabView(doc); doc.body.append(v.host)
+  v.render({ costume: 'medium', working: true, phase: 0 })
+  const crab = v.host.shadowRoot!.querySelector('.crab') as HTMLElement
+  crab.style.transform = at
+  const calls: unknown[] = []
+  ;(crab as any).animate = (keyframes: unknown, options: unknown) => { calls.push([keyframes, options]); return { cancel() {} } }
+  return { v, crab, calls }
+}
+test('done mid-walk: the crab stops dancing and runs back to the start in 2 s', () => {
+  const { v, crab, calls } = midWalk('translateX(300px)')
+  v.render({ costume: 'medium', working: false, phase: 0 })
+  assert.equal(crab.classList.contains('walk'), false)
+  assert.doesNotMatch(crab.innerHTML, / run"/)
+  assert.deepEqual(calls, [[[{ transform: 'translateX(300px)' }, { transform: 'none' }], { duration: 2000, easing: 'ease-in-out' }]])
+})
+test('done at the start: nothing to run back', () => {
+  const { v, calls } = midWalk('none')
+  v.render({ costume: 'medium', working: false, phase: 0 })
+  assert.deepEqual(calls, [])
+})
+test('a new reply during the run back cancels it and walks again', () => {
+  const { v, crab } = midWalk('translateX(300px)')
+  let cancelled = false
+  ;(crab as any).animate = () => ({ cancel() { cancelled = true } })
+  v.render({ costume: 'medium', working: false, phase: 0 })
+  v.render({ costume: 'medium', working: true, phase: 0 })
+  assert.equal(cancelled, true)
+  assert.equal(crab.classList.contains('walk'), true)
 })
