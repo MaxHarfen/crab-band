@@ -1,5 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
+import { ART } from '../../crab-band/hooks/crab.ts'
 import { routineOf } from '../../crab-band/hooks/moves.ts'
 import { crabSvg } from '../src/crab-svg.ts'
 import { createCrabView, createLimitsView } from '../src/view.ts'
@@ -86,4 +87,40 @@ test('a new reply during the run back cancels it and walks again', () => {
   v.render({ costume: 'medium', working: true, phase: 0 })
   assert.equal(cancelled, true)
   assert.equal(crab.classList.contains('walk'), true)
+})
+
+const cssOf = (v: { host: HTMLElement }): string =>
+  [...v.host.shadowRoot!.querySelectorAll('style')].map(s => s.textContent).join('\n')
+
+test('two footprints on each side of the crab, kept across redraws so they stay in step with the walk', () => {
+  const doc = newDoc({}); const v = createCrabView(doc); doc.body.append(v.host)
+  v.render({ costume: 'medium', working: true, phase: 0 })
+  const root = v.host.shadowRoot!
+  const trails = [...root.querySelectorAll('.crab .trail')]
+  assert.deepEqual(trails.map(t => [t.className, t.querySelectorAll('i').length]), [['trail l', 2], ['trail r', 2]])
+  v.render({ costume: 'sonnet', working: true, phase: 3 })
+  assert.equal(root.querySelector('.crab .trail'), trails[0])
+})
+test('the footprints follow the walk: behind the crab both ways, only while walking, never with reduced motion', () => {
+  const doc = newDoc({}); const v = createCrabView(doc); doc.body.append(v.host)
+  const css = cssOf(v)
+  assert.match(css, /\.walk \.trail\.l\{animation:crab-trail-l 30s step-end infinite\}/)
+  assert.match(css, /\.walk \.trail\.r\{animation:crab-trail-r 30s step-end infinite\}/)
+  assert.match(css, /(^|\n)\.trail\{[^}]*display:none/)
+  assert.match(css, /prefers-reduced-motion[^@]*\.trail\{display:none/)
+})
+test('the footprints sit where each outfit\'s feet stand', () => {
+  const doc = newDoc({}); const v = createCrabView(doc); doc.body.append(v.host)
+  const crab = v.host.shadowRoot!.querySelector('.crab') as HTMLElement
+  v.render({ costume: 'medium', working: true, phase: 0 })
+  assert.equal(crab.style.getPropertyValue('--feet'), '1.5px')
+  v.render({ costume: 'fable', working: true, phase: 0 })
+  assert.equal(crab.style.getPropertyValue('--feet'), '6px')
+})
+test('the footprints are the crab\'s own orange and blink like Claude\'s working dot (Max, live check)', () => {
+  const doc = newDoc({}); const v = createCrabView(doc); doc.body.append(v.host)
+  const css = cssOf(v)
+  assert.equal(ART.base.legend.c[0], '#D97757')
+  assert.match(css, new RegExp(`\\.trail i\\{[^}]*background:${ART.base.legend.c[0]}`))
+  assert.match(css, /\.trail i\{[^}]*animation:crab-print /)
 })
