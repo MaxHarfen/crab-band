@@ -35,8 +35,9 @@ Unofficial: crab-band is a fan-made extension, not made or endorsed by Anthropic
   functionality. Pick from the dashboard's list.
 - **Language:** English
 - **Store icon:** `chrome/icons/128.png` (96 px crab with 16 px of transparent padding)
-- **Screenshots:** 1 to 5, 1280 x 800, taken from a demo chat made for the purpose (never a real one): the crab
-  walking under a reply with its footprints, and the limits line next to the model picker.
+- **Screenshots:** `chrome/store/screenshot-1.png` (1280 x 800): a demo chat made for the purpose, Sonnet 5.5
+  Medium, the musician crab walking under the reply with its footprints, the limits line next to the model
+  picker. Cropped to the chat column, so no sidebar, chat title or account name shows. Up to 4 more may be added.
 - **Small promo tile** (440 x 280, optional): none yet.
 - **Homepage URL:** https://github.com/MaxHarfen/crab-band
 - **Support URL:** https://github.com/MaxHarfen/crab-band/issues
