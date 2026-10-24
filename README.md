@@ -71,8 +71,9 @@ Start a new session afterwards. The status line and the band appear by themselve
 A separate Chrome extension in [`chrome/`](chrome/) brings the crab to claude.ai in the browser. While Claude answers, a crab
 dances and walks slowly under the reply, dressed for the model and effort in the model picker, and the 5-hour and 7-day
 limits show next to the picker. It uses no tokens, asks for no permissions and runs only on claude.ai. It installs on its
-own, in Chrome, and has nothing to do with the plugin install above. [chrome/README.md](chrome/README.md) says what it reads
-and how to load it; [chrome/PRIVACY.md](chrome/PRIVACY.md) is its privacy policy.
+own, in Chrome, and has nothing to do with the plugin install above. Install it from the
+[Chrome Web Store](https://chromewebstore.google.com/detail/crab-band/ckkgdmclglmcfkgjmedilbmenbicmall). [chrome/README.md](chrome/README.md) says what it reads and how to build it;
+[chrome/PRIVACY.md](chrome/PRIVACY.md) is its privacy policy.
 
 ## Developing
 

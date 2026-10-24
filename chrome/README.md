@@ -23,7 +23,13 @@ It costs no tokens: the extension draws the crab itself, from the page, and neve
 
 Effort is read from the picker's English labels, so with claude.ai in another language an Opus crab stays plain.
 
-## Install (Load unpacked)
+## Install
+
+From the Chrome Web Store: [crab-band](https://chromewebstore.google.com/detail/crab-band/ckkgdmclglmcfkgjmedilbmenbicmall). It works in Chrome and other Chromium browsers (Edge, Brave,
+Arc). With Enhanced Safe Browsing on, Chrome may warn that the extension is not trusted yet: that is shown for every
+new publisher until its account has been in good standing for a while.
+
+### From source (Load unpacked)
 
 ```bash
 cd chrome
@@ -32,8 +38,8 @@ npm run build
 ```
 
 Then open `chrome://extensions`, turn on **Developer mode**, click **Load unpacked** and pick the `chrome/dist`
-folder. It works in Chrome and other Chromium browsers (Edge, Brave, Arc). After a rebuild, press the reload
-icon on the extension's card.
+folder. After a rebuild, press the reload icon on the extension's card. Turn off the store version while the
+unpacked one is on, or both draw a crab.
 
 ## What it reads and sends
 
