@@ -25,11 +25,13 @@ Effort is read from the picker's English labels, so with claude.ai in another la
 
 ## Install
 
-From the Chrome Web Store: [crab-band](https://chromewebstore.google.com/detail/crab-band/ckkgdmclglmcfkgjmedilbmenbicmall). It works in Chrome and other Chromium browsers (Edge, Brave,
+Install it from the Chrome Web Store, which keeps it up to date: [crab-band](https://chromewebstore.google.com/detail/crab-band/ckkgdmclglmcfkgjmedilbmenbicmall). It works in Chrome and other Chromium browsers (Edge, Brave,
 Arc). With Enhanced Safe Browsing on, Chrome may warn that the extension is not trusted yet: that is shown for every
 new publisher until its account has been in good standing for a while.
 
 ### From source (Load unpacked)
+
+Only needed to change the extension or to try a build the store does not have yet.
 
 ```bash
 cd chrome
